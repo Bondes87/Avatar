@@ -12,10 +12,12 @@ import java.io.IOException;
  * Created by Dmitro Bondarenko on 09.08.2017.
  */
 public class AvatarCreator {
-    // The constant adjusting the size of the avatar (the number of pixels).
+    // The constant controlling the size of the avatar (the number of pixels).
     private static final int SIZE_AVATAR = 5;
-    // The constant adjusting the background color of the avatar.
+    // The constant controlling the background color of the avatar.
     private static final Color COLOR_BACKGROUND = new Color(255, 255, 255);
+    // The constant controlling the maximum color component value.
+    private static final int MAXIMUM_COLOR_COMPONENT_VALUE = 256;
 
     /**
      * Create an avatar using the input string.
@@ -57,9 +59,9 @@ public class AvatarCreator {
      * @return Color of avatar.
      */
     private Color getColorOfAvatar(int hashOfName) {
-        int red = hashOfName % 256;
-        int green = (red * 2) % 256;
-        int blue = (red * 3) % 256;
+        int red = hashOfName % MAXIMUM_COLOR_COMPONENT_VALUE;
+        int green = (red * 2) % MAXIMUM_COLOR_COMPONENT_VALUE;
+        int blue = (red * 3) % MAXIMUM_COLOR_COMPONENT_VALUE;
         return new Color(red, green, blue);
     }
 
@@ -90,6 +92,5 @@ public class AvatarCreator {
         } catch (IOException e) {
             e.printStackTrace();
         }
-
     }
 }
