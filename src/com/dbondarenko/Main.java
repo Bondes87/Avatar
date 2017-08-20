@@ -6,8 +6,9 @@ package com.dbondarenko;
  * Created by Dmitro Bondarenko on 09.08.2017.
  */
 public class Main {
+
     public static void main(String[] args) {
-        AvatarCreator avatar = new AvatarCreator();
-        avatar.create("Dmitro");
+        AvatarCreator avatar = new AvatarCreator(new AvatarOptions("Dmytro"));
+        Writer.writeImageToFile(avatar.create());
     }
 }

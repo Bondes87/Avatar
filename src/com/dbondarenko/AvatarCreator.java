@@ -1,96 +1,76 @@
 package com.dbondarenko;
 
-import javax.imageio.ImageIO;
 import java.awt.*;
 import java.awt.image.BufferedImage;
-import java.io.File;
-import java.io.IOException;
 
 /**
  * File: AvatarCreator.java
- * The class that creates the avatar from the name.
+ * The class that creates the avatar.
  * Created by Dmitro Bondarenko on 09.08.2017.
  */
 public class AvatarCreator {
-    // The constant controlling the size of the avatar (the number of pixels).
-    private static final int SIZE_AVATAR = 5;
-    // The constant controlling the background color of the avatar.
-    private static final Color COLOR_BACKGROUND = new Color(255, 255, 255);
-    // The constant controlling the maximum color component value.
-    private static final int MAXIMUM_COLOR_COMPONENT_VALUE = 256;
+
+    // The number of pixels that make up the width of the avatar.
+    private static final int AVATAR_WIDTH = 5;
+    // The number of pixels that make up the height of the avatar.
+    private static final int AVATAR_HEIGHT = 5;
+    // The color that is used for the avatar background.
+    private static final Color BACKGROUND = new Color(255, 255, 255);
+
+    private AvatarOptions avatarOptions;
+
+    public AvatarCreator(AvatarOptions options) {
+        if (options == null) {
+            throw new NullPointerException();
+        } else {
+            avatarOptions = options;
+        }
+    }
 
     /**
-     * Create an avatar using the input string.
+     * Create an avatar. The image is created by painting each pixel in the desired color.
+     * The color of the pixel is determined from the value of the desired bit.
+     * If the bit value is 1, then this is the color of the avatar, if 0 is the background color.
      *
-     * @param name The input string.
+     * @return bufferedImage.
      */
-    public void create(String name) {
-        // Get the hash code from the string.
-        int hashCodeOfName = Math.abs(name.hashCode());
-        // Get the length of the bit sequence of the string.
-        int bitSequenceLength = Integer.toBinaryString(hashCodeOfName).length();
-        // Get avatar color.
-        Color colorOfAvatar = getColorOfAvatar(hashCodeOfName);
-        // Create image.
-        BufferedImage bufferedImage = new BufferedImage(SIZE_AVATAR, SIZE_AVATAR, BufferedImage.TYPE_INT_RGB);
-        // Bit counter.
+    public BufferedImage create() {
+        BufferedImage bufferedImage = new BufferedImage(AVATAR_WIDTH, AVATAR_HEIGHT, BufferedImage.TYPE_INT_RGB);
+        // The counter that is used to determine the position of a bit in a bit sequence.
         int counter = 0;
         for (int i = 0; i < bufferedImage.getHeight(); i++) {
             for (int j = 0; j <= bufferedImage.getWidth() / 2; j++) {
-                int positionOfBit = counter % bitSequenceLength;
-                if ((hashCodeOfName >> positionOfBit & 1) == 1) {
-                    // Set pixel color.
-                    setColorPixel(colorOfAvatar, bufferedImage, j, i);
+                // The position of the bit in the bit sequence. Used to calculate the bit value.
+                int positionOfBit = counter % avatarOptions.getBitSequenceLength();
+                // Depending on the bit value, the pixel color is selected. If the bit value is 1,
+                // then this is the color of the avatar, if 0 is the background color.
+                if ((avatarOptions.getHashCodeOfName() >> positionOfBit & 1) == 1) {
+                    // Paint over the pixel in the color of the avatar.
+                    paintOverPixel(avatarOptions.getAvatarColor(), bufferedImage, j, i);
                 } else {
-                    // Set pixel color.
-                    setColorPixel(COLOR_BACKGROUND, bufferedImage, j, i);
+                    // Paint over the pixel in the color of the background.
+                    paintOverPixel(BACKGROUND, bufferedImage, j, i);
                 }
                 counter++;
             }
         }
-        // Write image to file.
-        writeImageToFile(bufferedImage);
+        return bufferedImage;
     }
 
     /**
-     * Get the avatar color using the hash code of the string.
+     * Paint over the pixel with the desired color. Painting is carried out at once two pixels.
+     * Select the pixel on the right side of the image from the received coordinates.
+     * On the left side, the pixel is selected mirror-wise to the right pixel.
      *
-     * @param hashOfName The hash code of the string.
-     * @return Color of avatar.
-     */
-    private Color getColorOfAvatar(int hashOfName) {
-        int red = hashOfName % MAXIMUM_COLOR_COMPONENT_VALUE;
-        int green = (red * 2) % MAXIMUM_COLOR_COMPONENT_VALUE;
-        int blue = (red * 3) % MAXIMUM_COLOR_COMPONENT_VALUE;
-        return new Color(red, green, blue);
-    }
-
-    /**
-     * Set pixel color.
-     *
-     * @param colorPixel    The color of pixel.
-     * @param bufferedImage The image that changes the color of the pixel.
+     * @param colorPixel    The color for painting the pixel.
+     * @param bufferedImage The image in which paint over the pixels.
      * @param x             The pixel coordinate.
      * @param y             The pixel coordinate.
      */
-    private void setColorPixel(Color colorPixel, BufferedImage bufferedImage, int x, int y) {
+    private void paintOverPixel(Color colorPixel, BufferedImage bufferedImage, int x, int y) {
+        // Paint over the pixel on the left side of the image.
         bufferedImage.setRGB(x, y, colorPixel.getRGB());
-        if (SIZE_AVATAR % 2 == 0 || x != bufferedImage.getWidth() / 2) {
-            bufferedImage.setRGB(bufferedImage.getWidth() - 1 - x, y, colorPixel.getRGB());
-        }
-    }
-
-    /**
-     * Writes the resulting image to a file.
-     *
-     * @param bufferedImage The Image to write to file.
-     */
-    private void writeImageToFile(BufferedImage bufferedImage) {
-        File image = new File("avatar.png");
-        try {
-            ImageIO.write(bufferedImage, "png", image);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        // Paint over the pixel on the right side of the image.
+        bufferedImage.setRGB(bufferedImage.getWidth() - 1 - x, y, colorPixel.getRGB());
     }
 }
