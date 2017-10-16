@@ -8,7 +8,9 @@ package com.dbondarenko;
 public class Main {
 
     public static void main(String[] args) {
-        AvatarCreator avatar = new AvatarCreator(new AvatarOptions("Dmytro"));
-        Writer.writeImageToFile(avatar.create());
+        if (args[0] != null && !args[0].isEmpty()) {
+            AvatarCreator avatar = new AvatarCreator(new AvatarOptions(args[0]));
+            Writer.writeImageToFile(avatar.create());
+        }
     }
 }
